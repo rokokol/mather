@@ -1,0 +1,8 @@
+{
+  "RU": {
+    "start": "Ну привет, дорогой @{}. Не желаешь взять интеграл со мной? \uD83E\uDD2D\nSwitch language: /lang"
+  },
+  "EN": {
+    "start": "Wellcome, @{}. Don't mind to take an integral with me? \uD83E\uDD2D\nПоменять язык: /lang"
+  }
+}
