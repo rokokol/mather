@@ -1,2 +1,2 @@
-# mather
-Telegram bot for solving mathematical problems with a user-friendly interface
+# Mather
+Телеграм-бот с человеческим интерфейсом для решения математических проблем 🤓
