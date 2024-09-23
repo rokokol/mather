@@ -1,8 +1,32 @@
 {
   "RU": {
-    "start": "Ну привет, дорогой @{}. Не желаешь взять интеграл со мной? \uD83E\uDD2D\nSwitch language: /lang"
+    "start": "Ну привет, дорогой @{}. Не желаешь взять интеграл со мной? \uD83E\uDD2D\n\n---\nSwitch language: /lang",
+    "expr_caption": "Твое {} выражение \uD83D\uDE0E\n\n---\n{} версия:\n`{}`",
+    "too_hard": "Поняла, что считать это слишком долго... Дай что-нибудь попроще \uD83D\uDE2C",
+    "too_long_to_fit": "Результат слишком длинный для того, чтобы вместить его тут \uD83D\uDE2E\u200D\uD83D\uDCA8",
+    "too_long_to_save": "Результат слишком большой даже для того, чтобы просто хранить его в памяти \uD83D\uDE32",
+    "too_big_expr": "Tвое выражение... слишком длинное \uD83D\uDE2C",
+    "empty_expr": "Введи выражение после /expr",
+    "expr_invite": "\uD83E\uDDD0 Сначала введи выражение с помощью /expr\n\nДля дальнейшей работы используй остальные команды — подробнее /help",
+    "too_big_args": "Слишком длинные аргументы... \uD83D\uDE29",
+    "diff_single_value_error": "\uD83E\uDDD0 Не могу разобраться... Как это дифференцировать? Уточни с помощью аргументов:\n`/diff arg1 arg2 ... argn`",
+    "diff_value_error": "Не могу разобраться... Слишком много аргументов или с ними что-то не так \uD83E\uDDD0",
+    "diff_caption": "Продифференцировала ☺\uFE0F\n`{}`",
+    "wrong_expr": "Не понимаю ввод \uD83E\uDD28"
   },
   "EN": {
-    "start": "Wellcome, @{}. Don't mind to take an integral with me? \uD83E\uDD2D\nПоменять язык: /lang"
+    "start": "Wellcome, @{}. Don't mind to take an integral with me? \uD83E\uDD2D\n\n---\nПоменять язык: /lang",
+    "expr_caption": "There is your {} expression \uD83D\uDE0E\n\n---\n{} version:\n`{}`",
+    "too_long_to_fit": "The result is too long to fit it here \uD83D\uDE2E\u200D\uD83D\uDCA8",
+    "too_long_to_save": "The result is too big even to just store it in memory \uD83D\uDE32",
+    "too_hard": "I realized that it took too long to count... Give me something simpler \uD83D\uDE2C",
+    "too_big_expr": "Your expression... is... too big \uD83D\uDE2C",
+    "empty_expr": "Input your expression after /expr",
+    "expr_invite": "\uD83E\uDDD0 Enter your expression with /expr first\n\nAnd use other commands for further work — /help to more details",
+    "too_big_args": "Too long arguments... \uD83D\uDE29",
+    "diff_single_value_error": "\uD83E\uDDD0 I can't understand... How to differentiate that? Specify it with args:\n`/diff arg1 arg2 ... argn`",
+    "diff_value_error": "I can't understand... There are too many arguments or something is wrong with them \uD83E\uDDD0",
+    "diff_caption": "I differentiated it ☺\uFE0F\n`{}`",
+    "wrong_expr": "I can't understand the input \uD83E\uDD28"
   }
 }

@@ -1,41 +1,61 @@
 import asyncio
-import os
 
-import sympy as sp
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
-from aiogram.types import FSInputFile
-from PIL import Image
+from sympy import Expr
+from sympy.parsing.latex import LaTeXParsingError
 
 from enums import *
-from constants import *
-from utils import *
+from src.utils.math_utils import make_expr, make_diff
+from src.utils.utils import *
 
 
 async def main() -> None:
-    dp = Dispatcher()
+    dp = Dispatcher(parse_mode=None)
 
-    def get_msg(user: dict, message: str) -> str:
-        return phrases[user['lang']][message]
+    def update_users() -> None:
+        serialize_to_json(users, USERS_PATH)
 
-    def authorize(id: int) -> dict:
-        if str(id) in users:
-            return users[str(id)]
+    def get_msg(user: dict, message: str, *format_strings: str) -> str:
+        return phrases[user['lang']][message].format(*format_strings)
+
+    def authorize(user_id: int) -> dict:
+        if str(user_id) in users:
+            return users[str(user_id)]
         else:
             user = {
                 'lang': Language.RU.value
             }
-            users[str(id)] = user
-            serialize_to_json(users, 'data/users.json')
+            users[str(user_id)] = user
+            update_users()
 
             return user
+
+    async def check_expr(expr: Expr, msg: types.Message, user: dict) -> tuple[Expr, None | types.Message, bool]:
+        if len(expr.atoms()) > MAX_SAVE_ATOMS:
+            await msg.answer(get_msg(user, 'too_long_to_save'))
+            return expr, None, False
+
+        user['expr'] = str(expr)
+        if len(expr.atoms()) > MAX_EXPRESSION_ATOMS or len(str(expr)) > MAX_EXPRESSION_LENGTH:
+            await msg.answer(get_msg(user, 'too_long_to_fit'))
+            return expr, None, False
+
+        response = await generate_latex(msg, expr)
+
+        if user['parse_type'] == Parsings.LATEX.value:
+            expr = sp.latex(expr)
+        else:
+            expr = str(expr)
+
+        return expr, response, True
 
     @dp.message(Command(commands=['start']))
     async def start_message(msg: types.Message) -> None:
         user = authorize(msg.from_user.id)
-        await msg.answer(get_msg(user, 'start').format(msg.from_user.username))
+        await msg.answer(get_msg(user, 'start', msg.from_user.username))
 
     @dp.message(Command(commands=['lang']))
     async def start_message(msg: types.Message) -> None:
@@ -46,29 +66,95 @@ async def main() -> None:
         else:
             user['lang'] = Language.RU.value
 
-        serialize_to_json(users, 'data/users.json')
-        await msg.answer(get_msg(user, 'start').format(msg.from_user.username))
+        serialize_to_json(users, USERS_PATH)
+        await msg.answer(get_msg(user, 'start', msg.from_user.username))
 
     @dp.message(Command(commands=['expr']))
-    async def toggle_web(msg: types.Message) -> None:
+    async def set_expr(msg: types.Message) -> None:
         user = authorize(msg.from_user.id)
-        expr = msg.text[6:]
-        user['expr'] = expr
+        text = get_text(msg, 6)
 
-        sp.preview(f'${expr}$', viewer='file', filename=TEMP_LATEX, dvioptions=["-D", "700"])
-        with Image.open(TEMP_LATEX) as img:
-            # Проверяем, превышает ли оно допустимые размеры
-            if img.width > MAX_WIDTH or img.height > MAX_HEIGHT:
-                # Сжимаем изображение
-                img.thumbnail((MAX_WIDTH, MAX_HEIGHT))
-                img.save(TEMP_LATEX)
+        if len(text) > MAX_EXPRESSION_LENGTH:
+            await msg.answer(get_msg(user, 'too_big_expr'))
+            return
+        elif len(text) == 0:
+            await msg.answer(get_msg(user, 'empty_expr'))
+            return
 
-        photo = FSInputFile(TEMP_LATEX)
+        try:
+            expr, parse_type = make_expr(text)
+        except TimeoutError:
+            await msg.answer(get_msg(user, 'too_hard'))
+            return
+        except LaTeXParsingError:
+            await msg.answer(get_msg(user, 'wrong_expr'))
+            return
 
-        await msg.answer_photo(photo)
-        os.remove(TEMP_LATEX)
+        if len(expr.atoms()) > MAX_EXPRESSION_ATOMS:
+            await msg.answer(get_msg(user, 'too_big_expr'))
+            return
 
-    print('starting...')
+        response = await generate_latex(msg, expr)
+        user['expr'] = str(expr)
+        user['parse_type'] = parse_type.value
+
+        if parse_type.value == Parsings.SYMPY.value:
+            alt_mode = Parsings.LATEX.value
+            alt_expr = sp.latex(expr)
+        else:
+            alt_mode = Parsings.SYMPY.value
+            alt_expr = str(expr)
+
+        await response.reply(get_msg(
+            user,
+            'expr_caption',
+            parse_type.value,
+            alt_mode,
+            alt_expr
+        ))
+
+        update_users()
+
+    @dp.message(Command(commands=['diff']))
+    async def set_expr(msg: types.Message) -> None:
+        user = authorize(msg.from_user.id)
+        text = get_text(msg, 6)
+
+        if len(text) > MAX_DIFF_ARGUMENTS_LENGTH:
+            await msg.answer(get_msg(user, 'too_big_args'))
+            return
+
+        expr = sp.sympify(user['expr'])
+        if len(text) == 0:
+            try:
+                expr = make_diff(expr)
+            except ValueError:
+                await msg.answer(get_msg(user, 'diff_single_value_error'))
+                return
+            except TimeoutError:
+                await msg.answer(get_msg(user, 'too_hard'))
+                return
+        else:
+            try:
+                expr = make_diff(expr, args=text)
+            except ValueError:
+                await msg.answer(get_msg(user, 'diff_value_error'))
+                return
+            except TimeoutError:
+                await msg.answer(get_msg(user, 'too_hard'))
+                return
+
+        expr, response, show = await check_expr(expr, msg, user)
+
+        if show:
+            await response.reply(get_msg(user, 'diff_caption', expr))
+
+    @dp.message()
+    async def text_msg(msg: types.Message) -> None:
+        user = authorize(msg.from_user.id)
+        await msg.answer(get_msg(user, 'expr_invite'))
+
+    print('start polling...')
     await dp.start_polling(bot)
 
 
