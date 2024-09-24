@@ -1,12 +1,12 @@
 from enum import Enum
 
 
-class Language(Enum):
+class Languages(Enum):
     RU = 'RU'
     EN = 'EN'
 
 
-class Parsings(Enum):
+class ParseTypes(Enum):
     LATEX = 'LaTeX'
     SYMPY = 'sympy'
 
@@ -14,3 +14,8 @@ class Parsings(Enum):
 class LatexMode(Enum):
     STICKER = 'sticker'
     IMAGE = 'img'
+
+
+class OperationsTypes(Enum):
+    DIFF = 'diff'
+    INTEG = 'integrate'

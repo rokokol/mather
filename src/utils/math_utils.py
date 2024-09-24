@@ -1,21 +1,18 @@
 import sympy as sp
-from sympy import SympifyError, Expr
+from sympy import Expr
 from sympy.parsing.latex import parse_latex
 
-from src.enums import Parsings
 from src.utils.utils import timeout
 
 
-@timeout(5)
-def make_expr(text: str) -> (Expr, Parsings):
-    try:
-        expr = sp.sympify(text)
-        parse_type = Parsings.SYMPY
-    except SympifyError:
-        expr = parse_latex(text)
-        parse_type = Parsings.LATEX
+@timeout(2)
+def parse_sympy(text: str) -> Expr:
+    return sp.sympify(text)
 
-    return expr, parse_type
+
+@timeout(2)
+def parse_sympy(text: str) -> Expr:
+    return parse_latex(text)
 
 
 @timeout()

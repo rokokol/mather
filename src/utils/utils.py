@@ -46,7 +46,7 @@ async def generate_latex(msg: types.Message, expr: sp.Expr, mode=LatexMode.STICK
     return response
 
 
-def get_text(msg: types.Message, indent: int) -> str:
+def get_attrs(msg: types.Message, indent: int) -> str:
     return msg.text[indent:].strip()
 
 
