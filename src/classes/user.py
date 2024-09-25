@@ -1,4 +1,4 @@
-from src.enums import Languages, ParseTypes
+from src.classes.enums import Languages, ParseTypes
 from src.utils.utils import *
 
 
@@ -11,7 +11,8 @@ class User:
             match key:
                 case 'lang':
                     self._lang = Languages(value)
-                    self.phrases = User.langs[self.get_lang().value]
+                    self.phrases = User.langs[
+                        self.get_lang().value]
                 case 'expr':
                     self._expr = sp.sympify(value)
                 case 'parse_type':

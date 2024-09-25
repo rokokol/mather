@@ -1,16 +1,14 @@
-import errno
-import functools
 import json
 import os
-import signal
+import re
 
 import sympy as sp
 from PIL import Image
 from aiogram import types
 from aiogram.types import FSInputFile, Message
 
+from src.classes.enums import LatexMode
 from src.constants import *
-from src.enums import LatexMode
 
 
 def load_json_dict(file_path: str) -> dict:
@@ -29,8 +27,11 @@ def serialize_to_json(data, file_path: str) -> None:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 
-async def generate_latex(msg: types.Message, expr: sp.Expr, mode=LatexMode.STICKER) -> Message:
-    sp.preview(expr, viewer='file', filename=TEMP_LATEX, dvioptions=["-D", "700"])
+async def generate_latex(msg: types.Message, expr: sp.Expr, mode=LatexMode.STICKER, dpi="700") -> Message:
+    if len(dpi) < 1:
+        dpi = "700"
+
+    sp.preview(expr, viewer='file', filename=TEMP_LATEX, dvioptions=["-D", dpi])
     with Image.open(TEMP_LATEX) as img:
         if img.width > MAX_WIDTH or img.height > MAX_HEIGHT:
             img.thumbnail((MAX_WIDTH, MAX_HEIGHT))
@@ -46,25 +47,36 @@ async def generate_latex(msg: types.Message, expr: sp.Expr, mode=LatexMode.STICK
     return response
 
 
-def get_attrs(msg: types.Message, indent: int) -> str:
-    return msg.text[indent:].strip()
+def get_agrs(msg: types.Message, indent: int) -> str:
+    res = msg.text[indent:].strip()
+
+    print(res, msg.from_user.username)
+    return res
 
 
-def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
-    def decorator(func):
-        def _handle_timeout(signum, frame):
-            raise TimeoutError(error_message)
+def find_first_symbol(expr: sp.Expr) -> sp.Symbol:
+    for symbol in expr.atoms():
+        if isinstance(symbol, sp.Symbol):
+            return symbol
 
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            signal.signal(signal.SIGALRM, _handle_timeout)
-            signal.alarm(seconds)
-            try:
-                result = func(*args, **kwargs)
-            finally:
-                signal.alarm(0)
-            return result
+    raise ValueError("No symbol found")
 
-        return wrapper
 
-    return decorator
+def atomize_args(args: str) -> list:
+    args.replace('inf', 'oo')
+    args_arr = re.split(r' +', args)
+    if '' in args_arr:
+        args_arr.remove('')
+
+    return args_arr
+
+
+def clear_args(args: str) -> str:
+    return (args
+            .replace('inf', 'oo')
+            .replace('INF', 'oo')
+            .replace('π', 'pi')
+            .replace('e', 'E')
+            .replace('е', 'E')  # e from the Cyrillic alphabet
+            .replace('Е', 'E')  # Е from the Cyrillic alphabet
+            .strip())

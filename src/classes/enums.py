@@ -19,3 +19,6 @@ class LatexMode(Enum):
 class OperationsTypes(Enum):
     DIFF = 'diff'
     INTEG = 'integrate'
+    INTEGVAL = 'integrate_from_to'
+    SUBS = 'substitute'
+    EVAL = 'evaluate'
