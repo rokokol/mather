@@ -8,7 +8,7 @@ class Languages(Enum):
 
 class ParseTypes(Enum):
     LATEX = 'LaTeX'
-    SYMPY = 'sympy'
+    SYMPY = 'SymPy'
 
 
 class LatexMode(Enum):
@@ -22,3 +22,4 @@ class OperationsTypes(Enum):
     INTEGVAL = 'integrate_from_to'
     SUBS = 'substitute'
     EVAL = 'evaluate'
+    N = 'hard_eval'

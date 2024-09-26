@@ -35,6 +35,10 @@ async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) ->
             caption = 'eval_caption'
             value_error_string = 'eval_value_error'
             func = make_eval
+        case OperationsTypes.N.value:
+            caption = 'eval_caption'
+            value_error_string = 'eval_value_error'
+            func = make_hard_eval
         case _:
             print("error")
             return False
@@ -111,9 +115,9 @@ async def check_empty_args(args: str, msg: types.Message) -> bool:
         return True
 
 
-async def set_expr(msg: types.Message, mode: ParseTypes, args=None) -> None:
+async def set_expr(msg: types.Message, mode: ParseTypes, args='') -> None:
     user = User.get(msg.from_user.id)
-    if args is None:
+    if args == '':
         args = get_agrs(msg, 6)
 
     args = clear_args(args).replace(' ', '')
@@ -135,7 +139,7 @@ async def set_expr(msg: types.Message, mode: ParseTypes, args=None) -> None:
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
         return
-    except:
+    except ValueError or NameError or TypeError:
         await msg.answer(user.get_msg('wrong_expr'))
         return
 

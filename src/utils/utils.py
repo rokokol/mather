@@ -54,15 +54,21 @@ def get_agrs(msg: types.Message, indent: int) -> str:
     return res
 
 
-def find_first_symbol(expr: sp.Expr) -> sp.Symbol:
+def find_symbols(expr: sp.Expr, first=False) -> list[sp.Symbol]:
+    res = []
     for symbol in expr.atoms():
         if isinstance(symbol, sp.Symbol):
-            return symbol
+            res.append(symbol)
+            if first:
+                return res
 
-    raise ValueError("No symbol found")
+    if len(res) == 0:
+        raise ValueError("No symbol found")
+    else:
+        return res
 
 
-def atomize_args(args: str) -> list:
+def atomize_args(args: str) -> list[str]:
     args.replace('inf', 'oo')
     args_arr = re.split(r' +', args)
     if '' in args_arr:
@@ -73,10 +79,19 @@ def atomize_args(args: str) -> list:
 
 def clear_args(args: str) -> str:
     return (args
-            .replace('inf', 'oo')
-            .replace('INF', 'oo')
-            .replace('π', 'pi')
-            .replace('e', 'E')
-            .replace('е', 'E')  # e from the Cyrillic alphabet
-            .replace('Е', 'E')  # Е from the Cyrillic alphabet
+            # .replace('inf', 'oo')
+            # .replace('INF', 'oo')
+            # .replace('π', 'pi')
+            # .replace('e', 'E')
+            # .replace('е', 'E')  # e from the Cyrillic alphabet
+            # .replace('Е', 'E')  # Е from the Cyrillic alphabet
+            .replace(',', '.')
             .strip())
+
+
+def isfloat(x: str) -> bool:
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False

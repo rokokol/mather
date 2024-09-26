@@ -28,49 +28,83 @@ async def main() -> None:
 
         await msg.answer(user.get_msg('start', msg.from_user.username))
 
+    @dp.message(Command(commands=['help']))
+    async def helpf(msg: types.Message, args='') -> None:
+        user = User.get(msg.from_user.id)
+        if args == '':
+            args = get_agrs(msg, 6)
+
+        match args:
+            case 'start':
+                await msg.answer(user.get_msg('help'))  # Мб я добавлю справку для этого в будущем
+            case 'lang':
+                await msg.answer(user.get_msg('lang_help'))
+            case 'exprl':
+                await msg.answer(user.get_msg('exprl_help'))
+            case 'exprs':
+                await msg.answer(user.get_msg('exprs_help'))
+            case 'expr':
+                await msg.answer(user.get_msg('expr_help'))
+            case 'diff':
+                await msg.answer(user.get_msg('diff_help'))
+            case 'integ' | 'integrate':
+                await msg.answer(user.get_msg('integ_help'))
+            case 'integval':
+                await msg.answer(user.get_msg('integval_help'))
+            case 'eval' | 'evalf':
+                await msg.answer(user.get_msg('eval_help'))
+            case 'n' | 'N':
+                await msg.answer(user.get_msg('eval_help'))  # I hope I'll do that
+            case 'plot2d' | 'plot':
+                await msg.answer(user.get_msg('plot2d_help'))
+            case 'show' | 'photo':
+                await msg.answer(user.get_msg('show_help'))
+            case _:
+                await msg.answer(user.get_msg('help'))
+
     @dp.message(Command(commands=['exprl']))
-    async def exprl(msg: types.Message, args=None) -> None:
+    async def exprl(msg: types.Message, args='') -> None:
         await set_expr(msg, ParseTypes.LATEX, args=args)
 
     @dp.message(Command(commands=['exprs']))
-    async def exprs(msg: types.Message, args=None) -> None:
+    async def exprs(msg: types.Message, args='') -> None:
         await set_expr(msg, ParseTypes.SYMPY, args=args)
 
     @dp.message(Command(commands=['expr']))
-    async def expr_default(msg: types.Message, args=None) -> None:
+    async def expr_default(msg: types.Message, args='') -> None:
         await exprs(msg, args=args)
 
     @dp.message(Command(commands=['diff']))
-    async def diff(msg: types.Message, args=None) -> None:
-        if args is None:
+    async def diff(msg: types.Message, args='') -> None:
+        if args == '':
             args = get_agrs(msg, 6)
 
         await try_calc(msg, args, OperationsTypes.DIFF)
 
     @dp.message(Command(commands=['integ']))
-    async def integ(msg: types.Message, args=None) -> None:
-        if args is None:
+    async def integ(msg: types.Message, args='') -> None:
+        if args == '':
             args = get_agrs(msg, 7)
 
         await try_calc(msg, args, OperationsTypes.INTEG)
 
     @dp.message(Command(commands=['integval']))
-    async def integval(msg: types.Message, args=None) -> None:
-        if args is None:
+    async def integval(msg: types.Message, args='') -> None:
+        if args == '':
             args = get_agrs(msg, 10)
 
         await try_calc(msg, args, OperationsTypes.INTEGVAL)
 
     @dp.message(Command(commands=['subs']))
-    async def subs(msg: types.Message, args=None) -> None:
-        if args is None:
+    async def subs(msg: types.Message, args='') -> None:
+        if args == '':
             args = get_agrs(msg, 6)
 
         await try_calc(msg, args, OperationsTypes.SUBS)
 
     @dp.message(Command(commands=['eval']))
-    async def evalf(msg: types.Message, args=None) -> None:
-        if args is None:
+    async def evalf(msg: types.Message, args='') -> None:
+        if args == '':
             args = get_agrs(msg, 6)
 
         if not await check_max_args_len(args, msg, limit=2):
@@ -78,15 +112,44 @@ async def main() -> None:
 
         await try_calc(msg, args, OperationsTypes.EVAL)
 
+    @dp.message(Command(commands=['n']))
+    async def n(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 3)
+
+        if not await check_max_args_len(args, msg, limit=2):
+            return
+
+        await try_calc(msg, args, OperationsTypes.N)
+
+    @dp.message(Command(commands=['plot2d']))
+    async def plot2d(msg: types.Message, args='') -> None:
+        user = User.get(msg.from_user.id)
+        expr = user.get_expr()
+        if args == '':
+            args = get_agrs(msg, 8)
+
+        try:
+            make_plot2d(expr, args).save(TEMP_PLOT)
+            plot_img = FSInputFile(TEMP_PLOT)
+
+            response = await msg.answer_photo(plot_img)
+            await response.reply(user.get_msg('plot2d_caption', sp.latex(user.get_expr())))
+            os.remove(TEMP_PLOT)
+        except TimeoutError:
+            await msg.answer(user.get_msg('too_hard'))
+        except ValueError or NameError or TypeError:
+            await msg.answer(user.get_msg('plot2d_value_error'))
+
     @dp.message(Command(commands=['show']))
-    async def show(msg: types.Message, args=None) -> None:
+    async def show(msg: types.Message, args='') -> None:
         user = User.get(msg.from_user.id)
         expr = user.get_expr()
         if expr is None:
             await msg.answer(user.get_msg('expr_invite'))
             return
 
-        if args is None:
+        if args == '':
             args = get_agrs(msg, 6)
 
         if not await check_max_args_len(args, msg, limit=3):
@@ -123,6 +186,8 @@ async def main() -> None:
                 await start(msg)
             case 'lang':
                 await lang(msg)
+            case 'help' | 'helpf':
+                await helpf(msg, args=args)
             case 'exprs':
                 await exprs(msg, args=args)
             case 'exprl':
@@ -132,14 +197,19 @@ async def main() -> None:
             case 'diff':
                 await diff(msg, args=args)
             case 'integ' | 'integrate':
-                await integ(msg, args=args)
+                await integ(msg, args=args + ' ')
             case 'integval':
                 await integval(msg, args=args)
             case 'subs':
                 await subs(msg, args=args)
             case 'eval' | 'evalf':
                 await evalf(msg, args=args)
-            case 'show':
+            case 'n' | 'N':
+                # await n(msg, args=args)
+                await evalf(msg, args=args)  # мб в будущем поправлю
+            case 'plot2d' | 'plot':
+                await plot2d(msg, args=args)
+            case 'show' | 'photo':
                 await show(msg, args=args)
             case _:
                 await expr_default(msg, args=cmd + args)

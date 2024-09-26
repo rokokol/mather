@@ -47,7 +47,7 @@ class User:
         else:
             return None
 
-    def get_msg(self, message: str, *format_strings: str) -> str:
+    def get_msg(self, message: str, *format_strings: list[str]) -> str:
         return self.phrases[message].format(*format_strings)
 
     def get_alt_expr_str_tuple(self) -> tuple[str, str] | str:
