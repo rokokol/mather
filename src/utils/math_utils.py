@@ -1,10 +1,10 @@
 import sympy as sp
 from sympy.parsing.latex import parse_latex
-from sympy.plotting import plot
-from sympy.plotting.plot import Plot
+from sympy.plotting import plot, plot3d, plot3d_parametric_surface
+from sympy.plotting.plot import Plot, plot_parametric, plot3d_parametric_line
 
 from src.utils.timeout import timeout
-from src.utils.utils import find_symbols, atomize_args, clear_args, isfloat
+from src.utils.utils import find_symbols, atomize_args, isfloat, clear_and_atomize_args
 
 
 @timeout(2)
@@ -89,10 +89,10 @@ def make_hard_eval(expr: sp.Expr, args: str) -> sp.Expr:
 
 
 @timeout(4)
-def make_plot2d(expr: sp.Expr, args: str) -> Plot:
-    args = clear_args(args)
-    args = atomize_args(args)
-    if len(args) > 0 and not isfloat(args[0]):
+def make_plot2d(expr: sp.Expr, args: str) -> tuple[Plot, tuple[sp.Symbol]]:
+    args = clear_and_atomize_args(args)
+
+    if len(args) >= 1 and not isfloat(args[0]):
         var_arr = find_symbols(expr)
         var_arr.remove(sp.Symbol(args[0]))
         expr = expr.copy().subs({var: 0 for var in var_arr})
@@ -105,14 +105,105 @@ def make_plot2d(expr: sp.Expr, args: str) -> Plot:
     args = [float(i) for i in args]
     match len(args):
         case 0:
-            return plot(expr, xlabel=var, ylabel=f'f{var}', show=False)
+            return plot(expr, var, xlabel=var, ylabel=f'f({var})', show=False), (var,)
         case 1:
-            return plot(expr, (var, -args[0], args[0]), xlabel=var, ylabel=f'f{var}', show=False)
+            return plot(expr, (var, -args[0], args[0]), ylim=(-args[0], args[0]), xlabel=var, ylabel=f'f({var})',
+                        show=False), (var,)
         case 2:
-            return plot(expr, (var, -args[0], args[0]), ylim=(-args[1], args[1]), xlabel=var, ylabel=f'f{var}',
-                        show=False)
+            return plot(expr, (var, -args[0], args[0]), ylim=(-args[1], args[1]), xlabel=var, ylabel=f'f({var})',
+                        show=False), (var,)
         case 4:
-            return plot(expr, (var, args[0], args[1]), ylim=(args[2], args[3]), xlabel=var, ylabel=f'f{var}',
-                        show=False)
+            return plot(expr, (var, args[0], args[1]), ylim=(args[2], args[3]), xlabel=var, ylabel=f'f({var})',
+                        show=False), (var,)
+        case _:
+            raise ValueError(f'Invalid arguments: {args}')
+
+
+@timeout(5)
+def make_plot3d(expr: sp.Expr, args: str) -> tuple[Plot, tuple[sp.Symbol, sp.Symbol]]:
+    args = clear_and_atomize_args(args)
+
+    if len(args) >= 2 and not isfloat(args[0]) and not isfloat(args[1]):
+        var_arr = find_symbols(expr)
+        var_arr.remove(sp.Symbol(args[0]))
+        var_arr.remove(sp.Symbol(args[1]))
+        expr = expr.copy().subs({var: 0 for var in var_arr})
+
+        var1, var2 = args[0:2]
+        args.remove(args[0])
+        args.remove(args[0])
+    else:
+        var1, var2 = find_symbols(expr)[0:2]
+
+    args = [float(i) for i in args]
+    match len(args):
+        case 0:
+            return plot3d(expr, xlabel=var1, ylabel=var2, zlabel=f'f({var1}, {var2})',
+                          show=False), (var1, var2)
+        case 1:
+            return plot3d(expr, (var1, -args[0], args[0]), (var2, -args[0], args[0]), zlim=(-args[0], args[0]),
+                          xlabel=var1, ylabel=var2, zlabel=f'f({var1}, {var2})', show=False), (var1, var2)
+        case 3:
+            return plot3d(expr, (var1, -args[0], args[0]), (var2, -args[1], args[1]), zlim=(-args[2], args[2]),
+                          xlabel=var1, ylabel=var2, zlabel=f'f({var1}, {var2})', show=False), (var1, var2)
+        case 6:
+            return plot3d(expr, (var1, args[0], args[1]), (var2, args[2], args[3]), zlim=(args[4], args[5]),
+                          xlabel=var1, ylabel=var2, zlabel=f'f({var1}, {var2})', show=False), (var1, var2)
+        case _:
+            raise ValueError(f'Invalid arguments: {args}')
+
+
+# @timeout(3)
+def make_pplot2d(args: str) -> tuple[Plot, tuple[str, str]]:
+    args = clear_and_atomize_args(args)
+    match len(args):
+        case 2:
+            return plot_parametric(args[0], args[1], show=False), str(args[:2])
+        case 3:
+            var = list(set(find_symbols(sp.sympify(args[0]), first=True)) |
+                       set(find_symbols(sp.sympify(args[1]), first=True)))[0]
+            return plot_parametric(args[0], args[1], (var, f'-{args[2]}', args[2]), show=False), str(args[:2])
+        case _:
+            raise ValueError(f'Invalid arguments: {args}')
+
+
+@timeout(4)
+def make_pplot3d(args: str) -> tuple[Plot, tuple[str, str]]:
+    args = clear_and_atomize_args(args)
+    var_list = list(set(find_symbols(sp.sympify(args[0]))) |
+                    set(find_symbols(sp.sympify(args[1]))) |
+                    set(find_symbols(sp.sympify(args[2]))))
+
+    match len(var_list):
+        case 1:
+            match len(args) - 3:
+                case 0:
+                    return plot3d_parametric_line(args[0], args[1], args[2], show=False), str(args[:3])
+                case 1:
+                    return plot3d_parametric_line(args[0], args[1], args[2], (var_list[0], f'-{args[3]}', args[3]),
+                                                  show=False), str(args[:3])
+                case 2:
+                    return plot3d_parametric_line(args[0], args[1], args[2], (var_list[0], args[3], args[4]),
+                                                  show=False), str(args[:3])
+                case _:
+                    raise ValueError(f'Invalid arguments: {args}')
+        case 2:
+            match len(args) - 3:
+                case 0:
+                    return plot3d_parametric_surface(args[0], args[1], args[2], show=False), str(args[:3])
+                case 1:
+                    return (plot3d_parametric_surface(args[0], args[1], args[2], (var_list[0], f'-{args[3]}', args[3]),
+                                                      (var_list[1], f'-{args[3]}', args[3]), show=False),
+                            str(args[:3]))
+                case 2:
+                    return (plot3d_parametric_surface(args[0], args[1], args[2], (var_list[0], f'-{args[3]}', args[3]),
+                                                      (var_list[1], f'-{args[4]}', args[4]), show=False),
+                            str(args[:3]))
+                case 4:
+                    return (plot3d_parametric_surface(args[0], args[1], args[2], (var_list[0], args[3], args[4]),
+                                                      (var_list[1], args[5], args[6]), show=False),
+                            str(args[:3]))
+                case _:
+                    raise ValueError(f'Invalid arguments: {args}')
         case _:
             raise ValueError(f'Invalid arguments: {args}')

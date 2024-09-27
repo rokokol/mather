@@ -78,15 +78,23 @@ def atomize_args(args: str) -> list[str]:
 
 
 def clear_args(args: str) -> str:
+
     return (args
-            # .replace('inf', 'oo')
-            # .replace('INF', 'oo')
-            # .replace('π', 'pi')
-            # .replace('e', 'E')
-            # .replace('е', 'E')  # e from the Cyrillic alphabet
-            # .replace('Е', 'E')  # Е from the Cyrillic alphabet
-            .replace(',', '.')
+                # .replace('inf', 'oo')
+                # .replace('INF', 'oo')
+                # .replace('π', 'pi')
+                # .replace('e', 'E')
+                # .replace('е', 'E')  # e from the Cyrillic alphabet
+                # .replace('Е', 'E')  # Е from the Cyrillic alphabet
+                # .replace(',', '.')
             .strip())
+
+
+def clear_and_atomize_args(args: str) -> list[str]:
+    args = clear_args(args)
+    args = atomize_args(args)
+
+    return args
 
 
 def isfloat(x: str) -> bool:

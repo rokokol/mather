@@ -51,12 +51,20 @@ async def main() -> None:
                 await msg.answer(user.get_msg('integ_help'))
             case 'integval':
                 await msg.answer(user.get_msg('integval_help'))
+            case 'subs':
+                await msg.answer(user.get_msg('subs_help'))
             case 'eval' | 'evalf':
                 await msg.answer(user.get_msg('eval_help'))
             case 'n' | 'N':
                 await msg.answer(user.get_msg('eval_help'))  # I hope I'll do that
             case 'plot2d' | 'plot':
                 await msg.answer(user.get_msg('plot2d_help'))
+            case 'plot3d':
+                await msg.answer(user.get_msg('plot3d_help'))
+            case 'pplot2d' | 'pplot':
+                await msg.answer(user.get_msg('pplot2d_help'))
+            case 'pplot3d':
+                await msg.answer(user.get_msg('pplot3d_help'))
             case 'show' | 'photo':
                 await msg.answer(user.get_msg('show_help'))
             case _:
@@ -124,22 +132,31 @@ async def main() -> None:
 
     @dp.message(Command(commands=['plot2d']))
     async def plot2d(msg: types.Message, args='') -> None:
-        user = User.get(msg.from_user.id)
-        expr = user.get_expr()
         if args == '':
             args = get_agrs(msg, 8)
 
-        try:
-            make_plot2d(expr, args).save(TEMP_PLOT)
-            plot_img = FSInputFile(TEMP_PLOT)
+        await make_plot(msg, args, OperationsTypes.PLOT2D)
 
-            response = await msg.answer_photo(plot_img)
-            await response.reply(user.get_msg('plot2d_caption', sp.latex(user.get_expr())))
-            os.remove(TEMP_PLOT)
-        except TimeoutError:
-            await msg.answer(user.get_msg('too_hard'))
-        except ValueError or NameError or TypeError:
-            await msg.answer(user.get_msg('plot2d_value_error'))
+    @dp.message(Command(commands=['plot3d']))
+    async def plot3d_func(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 8)
+
+        await make_plot(msg, args, OperationsTypes.PLOT3D)
+
+    @dp.message(Command(commands=['pplot2d']))
+    async def pplot2d(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 9)
+
+        await make_pplot(msg, args, OperationsTypes.PPLOT2D)
+
+    @dp.message(Command(commands=['pplot3d']))
+    async def pplot3d(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 9)
+
+        await make_pplot(msg, args, OperationsTypes.PPLOT3D)
 
     @dp.message(Command(commands=['show']))
     async def show(msg: types.Message, args='') -> None:
@@ -209,6 +226,12 @@ async def main() -> None:
                 await evalf(msg, args=args)  # мб в будущем поправлю
             case 'plot2d' | 'plot':
                 await plot2d(msg, args=args)
+            case 'plot3d':
+                await plot3d_func(msg, args=args)
+            case 'pplot2d' | 'pplot':
+                await pplot2d(msg, args=args)
+            case 'pplot3d':
+                await pplot3d(msg, args=args)
             case 'show' | 'photo':
                 await show(msg, args=args)
             case _:

@@ -23,3 +23,7 @@ class OperationsTypes(Enum):
     SUBS = 'substitute'
     EVAL = 'evaluate'
     N = 'hard_eval'
+    PLOT2D = 'plot_2d'
+    PLOT3D = 'plot_3d'
+    PPLOT2D = 'parameterized_plot_2d'
+    PPLOT3D = 'parameterized_plot_3d'
