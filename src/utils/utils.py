@@ -78,15 +78,20 @@ def atomize_args(args: str) -> list[str]:
 
 
 def clear_args(args: str) -> str:
+    if len(args) == 0:
+        return ''
 
+    if args[0] == '[':
+        args = f'Matrix([{args}])'
     return (args
-                # .replace('inf', 'oo')
-                # .replace('INF', 'oo')
-                # .replace('π', 'pi')
-                # .replace('e', 'E')
-                # .replace('е', 'E')  # e from the Cyrillic alphabet
-                # .replace('Е', 'E')  # Е from the Cyrillic alphabet
-                # .replace(',', '.')
+            # .replace('inf', 'oo')
+            # .replace('INF', 'oo')
+            # .replace('π', 'pi')
+            # .replace('e', 'E')
+            # .replace('е', 'E')  # e from the Cyrillic alphabet
+            # .replace('Е', 'E')  # Е from the Cyrillic alphabet
+            # .replace(',', '.')
+            .replace('\n', '')
             .strip())
 
 
@@ -103,3 +108,15 @@ def isfloat(x: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def match_abs_cnj(expr: sp.Expr, args: str) -> sp.Expr:
+    match args:
+        case 'abs':
+            return sp.Abs(expr)
+        case 'cnj':
+            return expr.conjugate()
+        case '':
+            return expr
+        case _:
+            raise ValueError(f'Invalid arguments: {args}')

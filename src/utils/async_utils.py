@@ -2,6 +2,7 @@ import os
 
 from aiogram import types
 from aiogram.types import FSInputFile
+from sympy.parsing.latex import LaTeXParsingError
 
 from src.classes.enums import *
 from src.classes.user import User
@@ -39,7 +40,7 @@ async def make_pplot(msg: types.Message, args: str, operation: OperationsTypes) 
         os.remove(TEMP_PLOT)
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
-    except (ValueError, NameError, TypeError):
+    except (ValueError, NameError, TypeError, AttributeError, IndexError):
         await msg.answer(user.get_msg(value_error_string))
 
 
@@ -73,7 +74,7 @@ async def make_plot(msg: types.Message, args: str, operation: OperationsTypes) -
         os.remove(TEMP_PLOT)
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
-    except (ValueError, NameError, TypeError):
+    except (ValueError, NameError, TypeError, AttributeError, IndexError):
         await msg.answer(user.get_msg(value_error_string))
 
 
@@ -109,6 +110,18 @@ async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) ->
             caption_string = 'eval_caption'
             value_error_string = 'eval_value_error'
             func = make_hard_eval
+        case OperationsTypes.INV.value:
+            caption_string = 'inv_caption'
+            value_error_string = 'inv_value_error'
+            func = make_inv
+        case OperationsTypes.MOD.value:
+            caption_string = 'mod_caption'
+            value_error_string = 'mod_value_error'
+            func = make_mod
+        case OperationsTypes.SOLVE.value:
+            caption_string = 'solve_caption'
+            value_error_string = 'solve_value_error'
+            func = make_solve
         case _:
             print("error")
             return False
@@ -127,7 +140,7 @@ async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) ->
         else:
             return False
 
-    except (ValueError, AttributeError):
+    except (ValueError, NameError, TypeError, AttributeError, IndexError, NotImplementedError):
         await msg.answer(user.get_msg(value_error_string))
         return False
     except TimeoutError:
@@ -209,7 +222,7 @@ async def set_expr(msg: types.Message, mode: ParseTypes, args='') -> None:
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
         return
-    except (ValueError, NameError, TypeError):
+    except (ValueError, NameError, TypeError, LaTeXParsingError):
         await msg.answer(user.get_msg('wrong_expr'))
         return
 

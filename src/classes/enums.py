@@ -27,3 +27,6 @@ class OperationsTypes(Enum):
     PLOT3D = 'plot_3d'
     PPLOT2D = 'parameterized_plot_2d'
     PPLOT3D = 'parameterized_plot_3d'
+    INV = 'inverse'
+    MOD = 'module'
+    SOLVE = 'solve'

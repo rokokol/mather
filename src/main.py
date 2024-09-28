@@ -3,6 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 
 from src.utils.async_utils import *
@@ -65,8 +66,14 @@ async def main() -> None:
                 await msg.answer(user.get_msg('pplot2d_help'))
             case 'pplot3d':
                 await msg.answer(user.get_msg('pplot3d_help'))
+            case 'inv':
+                await msg.answer(user.get_msg('inv_help'))
+            case 'mod' | 'det':
+                await msg.answer(user.get_msg('mod_help'))
             case 'show' | 'photo':
                 await msg.answer(user.get_msg('show_help'))
+            case 'solve' | 'res':
+                await msg.answer(user.get_msg('solve_help'))
             case _:
                 await msg.answer(user.get_msg('help'))
 
@@ -109,6 +116,20 @@ async def main() -> None:
             args = get_agrs(msg, 6)
 
         await try_calc(msg, args, OperationsTypes.SUBS)
+
+    @dp.message(Command(commands=['inv']))
+    async def inv(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 5)
+
+        await try_calc(msg, args, OperationsTypes.INV)
+
+    @dp.message(Command(commands=['mod']))
+    async def mod(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 5)
+
+        await try_calc(msg, args, OperationsTypes.MOD)
 
     @dp.message(Command(commands=['eval']))
     async def evalf(msg: types.Message, args='') -> None:
@@ -158,6 +179,13 @@ async def main() -> None:
 
         await make_pplot(msg, args, OperationsTypes.PPLOT3D)
 
+    @dp.message(Command(commands=['solve']))
+    async def solve(msg: types.Message, args='') -> None:
+        if args == '':
+            args = get_agrs(msg, 7)
+
+        await try_calc(msg, args, OperationsTypes.SOLVE)
+
     @dp.message(Command(commands=['show']))
     async def show(msg: types.Message, args='') -> None:
         user = User.get(msg.from_user.id)
@@ -179,12 +207,15 @@ async def main() -> None:
             await msg.answer(user.get_msg('expr_invite'))
             return
 
-        response = await generate_latex(msg, expr, mode=LatexMode.IMAGE, dpi=args)
-        await response.reply(user.get_msg(
-            'expr_caption',
-            user.get_parse_type().value,
-            *user.get_expr_str_tuple()[::-1],
-        ))
+        try:
+            response = await generate_latex(msg, expr, mode=LatexMode.IMAGE, dpi=args)
+            await response.reply(user.get_msg(
+                'expr_caption',
+                user.get_parse_type().value,
+                *user.get_expr_str_tuple()[::-1],
+            ))
+        except TelegramBadRequest:
+            await msg.answer(user.get_msg('too_hard'))
 
     @dp.message()
     async def text_msg(msg: types.Message) -> None:
@@ -232,8 +263,14 @@ async def main() -> None:
                 await pplot2d(msg, args=args)
             case 'pplot3d':
                 await pplot3d(msg, args=args)
+            case 'inv':
+                await inv(msg, args=args)
+            case 'mod' | 'det':
+                await mod(msg, args=args)
             case 'show' | 'photo':
                 await show(msg, args=args)
+            case 'solve' | 'res':
+                await solve(msg, args=args)
             case _:
                 await expr_default(msg, args=cmd + args)
 
