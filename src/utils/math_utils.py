@@ -90,11 +90,6 @@ def make_eval(expr: sp.Expr, args: str) -> sp.Expr:
 
 
 @timeout()
-def make_hard_eval(expr: sp.Expr, args: str) -> sp.Expr:
-    pass
-
-
-@timeout()
 def make_plot2d(expr: sp.Expr, args: str) -> tuple[Plot, tuple[sp.Symbol]]:
     args = clear_and_atomize_args(args)
 

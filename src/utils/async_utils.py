@@ -38,10 +38,18 @@ async def make_pplot(msg: types.Message, args: str, operation: OperationsTypes) 
         response = await msg.answer_photo(plot_img)
         await response.reply(user.get_msg(caption_string, expressions))
         os.remove(TEMP_PLOT)
+        return True
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
-    except (ValueError, NameError, TypeError, AttributeError, IndexError):
+        return False
+    except (ValueError, NameError, TypeError, AttributeError, IndexError, NotImplementedError) as e:
         await msg.answer(user.get_msg(value_error_string))
+        print(e)
+        return False
+    except RuntimeError as e:
+        await msg.answer(user.get_msg("something_went_wrong"))
+        print(e)
+        return False
 
 
 async def make_plot(msg: types.Message, args: str, operation: OperationsTypes) -> bool:
@@ -72,10 +80,17 @@ async def make_plot(msg: types.Message, args: str, operation: OperationsTypes) -
         response = await msg.answer_photo(plot_img)
         await response.reply(user.get_msg(caption_string, *var_list, user.get_expr_str_tuple()[0]))
         os.remove(TEMP_PLOT)
+        return True
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
-    except (ValueError, NameError, TypeError, AttributeError, IndexError):
+    except (ValueError, NameError, TypeError, AttributeError, IndexError, NotImplementedError) as e:
         await msg.answer(user.get_msg(value_error_string))
+        print(e)
+        return False
+    except RuntimeError as e:
+        await msg.answer(user.get_msg("something_went_wrong"))
+        print(e)
+        return False
 
 
 async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) -> bool:
@@ -106,10 +121,6 @@ async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) ->
             caption_string = 'eval_caption'
             value_error_string = 'eval_value_error'
             func = make_eval
-        case OperationsTypes.N.value:
-            caption_string = 'eval_caption'
-            value_error_string = 'eval_value_error'
-            func = make_hard_eval
         case OperationsTypes.INV.value:
             caption_string = 'inv_caption'
             value_error_string = 'inv_value_error'
@@ -140,12 +151,16 @@ async def try_calc(msg: types.Message, args: str, operation: OperationsTypes) ->
         else:
             return False
 
-    except (ValueError, NameError, TypeError, AttributeError, IndexError, NotImplementedError):
+    except (ValueError, NameError, TypeError, AttributeError, IndexError, NotImplementedError) as e:
         await msg.answer(user.get_msg(value_error_string))
+        print(e)
         return False
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
         return False
+    except RuntimeError as e:
+        await msg.answer(user.get_msg("something_went_wrong"))
+        print(e)
 
 
 async def check_max_args_len(args: str, msg: types.Message, limit=MAX_DIFF_ARGUMENTS_LENGTH) -> bool:
@@ -222,8 +237,13 @@ async def set_expr(msg: types.Message, mode: ParseTypes, args='') -> None:
     except TimeoutError:
         await msg.answer(user.get_msg('too_hard'))
         return
-    except (ValueError, NameError, TypeError, LaTeXParsingError):
+    except (ValueError, NameError, TypeError, LaTeXParsingError) as e:
         await msg.answer(user.get_msg('wrong_expr'))
+        print(e)
+        return
+    except RuntimeError as e:
+        await msg.answer(user.get_msg("something_went_wrong"))
+        print(e)
         return
 
     response = await generate_latex(msg, expr)
