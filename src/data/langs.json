@@ -52,7 +52,8 @@
     "inv_help": "Верну обратное значение \uD83D\uDE0C\nЕсли это матрица — верну обратную ей, если это число — обратное этому числу. Так же есть флаги для дополнительных действий\nНапример:\n`/inv abs` — обратное и абсолютное значение\n`/inv cnj` — обратное и сопряженное значение",
     "mod_help": "Верну модуль/детерминант \uD83E\uDD13\nТак же есть флаги\nНапример:\n`/mod abs` — верну абсолютное знание (может быть полезно для детерминанта)\n`/mod cnj` — верну сопряженное знание (может быть полезно для детерминанта)",
     "solve_help": "Разрешу уравнение относительно переменной \uD83E\uDDD0\nЕсли переменных несколько — явно указывай относительно которой нужно решать. Так же, по умолчанию, я приравниваю все к нулю. Если тебя это не устраивает — укажи второй переменной то выражение, которое должно стоять после знака равенства\nНапример:\n`/solve x 128` — развешу относительно x уравнение expr = 128",
-    "show_help": "Покажу текущее выражение в виде картинки! Но учти, что в Telegram я не могу загрузить изображение, большее чем 1280x1280 прикселей \uD83E\uDD72\nМожешь указать разрешение в DPI при желании. Но не больше 1000! По умолчанию будет в 700 DPI \uD83E\uDD28\nНапример:\n`/show 300` — нарисую текущее выражение с разрешением в 300 DPI"
+    "show_help": "Покажу текущее выражение в виде картинки! Но учти, что в Telegram я не могу загрузить изображение, большее чем 1280x1280 прикселей \uD83E\uDD72\nМожешь указать разрешение в DPI при желании. Но не больше 1000! По умолчанию будет в 700 DPI \uD83E\uDD28\nНапример:\n`/show 300` — нарисую текущее выражение с разрешением в 300 DPI",
+    "something_went_wrong": "Что-то пошло не так... пожалуйста, попробуй позже \uD83D\uDE4F"
   },
   "EN": {
     "start": "Wellcome, @{}. Don't mind to take an integral with me? \uD83E\uDD2D\n\n---\nПоменять язык: /lang",
@@ -107,6 +108,7 @@
     "inv_help": "I'll return the reverse of the values \uD83D\uDE0C\nIf this is a matrix, I will return the inverse of it, if this number is the inverse of this number. There are also flags for additional actions\nFor example:\n`/inv abs` is the inverse and absolute value\n`/inv cnj` — inverse and conjugate value",
     "mod_help": "I'll return the module/determinant \uD83E\uDD13\nThere are also flags\nFor example:\n`/mod abs` — I will return absolute knowledge (may be useful for the determinant)\n`/mod cnj` — I will return conjugate knowledge (may be useful for the determinant)",
     "solve_help": "I will solve the equation with respect to the variable \uD83E\uDDD0\nIf there are several variables, explicitly specify which one to solve. Also, by default, I equate everything to zero. If you are not satisfied with this, specify the expression that should be after the equal sign to the second variable\nFor example:\n`/solve x 128` — I will hang it with respect to x, the equation expr = 128",
-    "show_help": "I'll show the current expression in the form of an image! But keep in mind that I cannot upload an image larger than 1280x1280 pixels to Telegram.\nYou can specify resolution in DPI if desired. But no more than 1000! By default, it will be 700 DPI.\nFor example:\n`/show 300` — I will draw the current expression with a resolution of 300 DPI\n"
+    "show_help": "I'll show the current expression in the form of an image! But keep in mind that I cannot upload an image larger than 1280x1280 pixels to Telegram.\nYou can specify resolution in DPI if desired. But no more than 1000! By default, it will be 700 DPI.\nFor example:\n`/show 300` — I will draw the current expression with a resolution of 300 DPI\n",
+    "something_went_wrong": "Something went wrong... please, try later \uD83D\uDE4F"
   }
 }

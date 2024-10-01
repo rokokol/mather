@@ -90,11 +90,6 @@ def make_eval(expr: sp.Expr, args: str) -> sp.Expr:
 
 
 @timeout()
-def make_hard_eval(expr: sp.Expr, args: str) -> sp.Expr:
-    pass
-
-
-@timeout()
 def make_plot2d(expr: sp.Expr, args: str) -> tuple[Plot, tuple[sp.Symbol]]:
     args = clear_and_atomize_args(args)
 
@@ -111,7 +106,7 @@ def make_plot2d(expr: sp.Expr, args: str) -> tuple[Plot, tuple[sp.Symbol]]:
     args = [float(i) for i in args]
     match len(args):
         case 0:
-            return plot(expr, var, xlabel=var, ylabel=f'f({var})', show=False), (var,)
+            return plot(expr, xlabel=var, ylabel=f'f({var})', show=False), (var,)
         case 1:
             return plot(expr, (var, -args[0], args[0]), ylim=(-args[0], args[0]), xlabel=var, ylabel=f'f({var})',
                         show=False), (var,)

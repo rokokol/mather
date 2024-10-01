@@ -54,10 +54,8 @@ async def main() -> None:
                 await msg.answer(user.get_msg('integval_help'))
             case 'subs':
                 await msg.answer(user.get_msg('subs_help'))
-            case 'eval' | 'evalf':
+            case 'eval' | 'evalf' | 'n' | 'N':
                 await msg.answer(user.get_msg('eval_help'))
-            case 'n' | 'N':
-                await msg.answer(user.get_msg('eval_help'))  # I hope I'll do that
             case 'plot2d' | 'plot':
                 await msg.answer(user.get_msg('plot2d_help'))
             case 'plot3d':
@@ -140,16 +138,6 @@ async def main() -> None:
             return
 
         await try_calc(msg, args, OperationsTypes.EVAL)
-
-    @dp.message(Command(commands=['n']))
-    async def n(msg: types.Message, args='') -> None:
-        if args == '':
-            args = get_agrs(msg, 3)
-
-        if not await check_max_args_len(args, msg, limit=2):
-            return
-
-        await try_calc(msg, args, OperationsTypes.N)
 
     @dp.message(Command(commands=['plot2d']))
     async def plot2d(msg: types.Message, args='') -> None:
@@ -250,11 +238,8 @@ async def main() -> None:
                 await integval(msg, args=args)
             case 'subs':
                 await subs(msg, args=args)
-            case 'eval' | 'evalf':
+            case 'eval' | 'evalf' | 'n' | 'N':
                 await evalf(msg, args=args)
-            case 'n' | 'N':
-                # await n(msg, args=args)
-                await evalf(msg, args=args)  # мб в будущем поправлю
             case 'plot2d' | 'plot':
                 await plot2d(msg, args=args)
             case 'plot3d':

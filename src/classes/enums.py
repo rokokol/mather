@@ -22,7 +22,6 @@ class OperationsTypes(Enum):
     INTEGVAL = 'integrate_from_to'
     SUBS = 'substitute'
     EVAL = 'evaluate'
-    N = 'hard_eval'
     PLOT2D = 'plot_2d'
     PLOT3D = 'plot_3d'
     PPLOT2D = 'parameterized_plot_2d'
